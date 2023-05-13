@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import '/services/SocketConnect.dart';
 import '/models/ProcessModel.dart';
@@ -18,6 +19,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final StreamController<String> _streamController = StreamController<String>();
+  double _pointerValue = 5.0;
 
   @override
   initState() {
@@ -33,29 +35,59 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  void _changePointerValue(double newValue) {
+    setState(() {
+      _pointerValue = newValue;
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SizedBox(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SizedBox(
-              width: MediaQuery.of(context).size.width / 2,
+              width: MediaQuery.of(context).size.width/2,
               child: CarouselSlider(
                 options: CarouselOptions(height: 400.0),
                 items: [1, 2].map((i) {
                   return Builder(
                     builder: (BuildContext context) {
-                      return Container(
-                          width: MediaQuery.of(context).size.width / 2,
-                          margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                          decoration: const BoxDecoration(color: Colors.amber),
-                          child: Text(
-                            'text $i',
-                            style: const TextStyle(fontSize: 16.0),
-                          ));
+                      return SfRadialGauge(axes: <RadialAxis>[
+                        RadialAxis(
+                            minimum: 0,
+                            maximum: 150,
+                            ranges: <GaugeRange>[
+                              GaugeRange(
+                                  startValue: 0,
+                                  endValue: 50,
+                                  color: Colors.green),
+                              GaugeRange(
+                                  startValue: 50,
+                                  endValue: 100,
+                                  color: Colors.orange),
+                              GaugeRange(
+                                  startValue: 100,
+                                  endValue: 150,
+                                  color: Colors.red)
+                            ],
+                            pointers: <GaugePointer>[
+                              NeedlePointer(value: _pointerValue)
+                            ],
+                            annotations: <GaugeAnnotation>[
+                              GaugeAnnotation(
+                                  widget: Text(_pointerValue.toStringAsFixed(2),
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold)),
+                                  angle: 90,
+                                  positionFactor: 0.5)
+                            ])
+                      ]);
                     },
                   );
                 }).toList(),
@@ -68,11 +100,12 @@ class _HomePageState extends State<HomePage> {
                   if (snapshot.hasData && snapshot.data != null) {
                     List<Widget> textWidgets = [];
                     var data = snapshot.data;
+                    print(data);
                     if (data != null) {
                       Map<String, dynamic> jsonCodeC = jsonDecode(data);
                       for (var element in jsonCodeC.values) {
                         textWidgets.add(Text(
-                          '${element["name"]}'+'${element["download"]}',
+                          '${element["name"]}' + ' ' + '${element["upload"]}',
                           style: const TextStyle(fontSize: 16.0),
                         ));
                       }
