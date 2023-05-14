@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:sizer/sizer.dart';
+import 'package:iac/widgets/gauge.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:speed_test_dart/classes/classes.dart';
+import 'package:speed_test_dart/speed_test_dart.dart';
+import 'package:vtable/vtable.dart';
 
 import '/services/SocketConnect.dart';
 import '/models/ProcessModel.dart';
+import '/widgets/gauge.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,13 +22,83 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final StreamController<String> _streamController = StreamController<String>();
-  double _pointerValue = 5.0;
+  SpeedTestDart tester = SpeedTestDart();
+  List<Server> bestServersList = [];
+
+  VTable<ProcessModel> createTable(List<ProcessModel> items) {
+    return VTable<ProcessModel>(
+      items: items,
+      tableDescription: '${items.length} items',
+      //startsSorted: true,
+      includeCopyToClipboardAction: true,
+      columns: [
+        VTableColumn(
+          label: 'ID',
+          width: 180,
+          transformFunction: (row) => row.name,
+        ),
+        VTableColumn(
+          label: 'Upload',
+          width: 100,
+          grow: 1,
+          transformFunction: (row) => row.upload,
+        ),
+      ],
+    );
+  }
+
+  double downloadRate = 0;
+  double uploadRate = 0;
+
+  bool readyToTest = false;
+  bool loadingDownload = false;
+  bool loadingUpload = false;
+
+  Future<void> setBestServers() async {
+    final settings = await tester.getSettings();
+    final servers = settings.servers;
+
+    final _bestServersList = await tester.getBestServers(
+      servers: servers,
+    );
+
+    setState(() {
+      bestServersList = _bestServersList;
+      readyToTest = true;
+    });
+  }
+
+  Future<void> _testDownloadSpeed() async {
+    setState(() {
+      loadingDownload = true;
+    });
+    final _downloadRate =
+        await tester.testDownloadSpeed(servers: bestServersList);
+    setState(() {
+      downloadRate = _downloadRate;
+      loadingDownload = false;
+    });
+  }
+
+  Future<void> _testUploadSpeed() async {
+    setState(() {
+      loadingUpload = true;
+    });
+
+    final _uploadRate = await tester.testUploadSpeed(servers: bestServersList);
+
+    setState(() {
+      uploadRate = _uploadRate;
+      loadingUpload = false;
+    });
+  }
 
   @override
   initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       connect(_streamController);
+      setBestServers();
     });
   }
 
@@ -35,89 +108,155 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _changePointerValue(double newValue) {
-    setState(() {
-      _pointerValue = newValue;
-    });
-  }
-
-
   @override
   Widget build(BuildContext context) {
+    final double halfScream = MediaQuery.of(context).size.width / 2;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SizedBox(
         child: Row(
-          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SizedBox(
-              width: MediaQuery.of(context).size.width/2,
+              width: MediaQuery.of(context).size.width / 2,
               child: CarouselSlider(
-                options: CarouselOptions(height: 400.0),
-                items: [1, 2].map((i) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return SfRadialGauge(axes: <RadialAxis>[
-                        RadialAxis(
-                            minimum: 0,
-                            maximum: 150,
-                            ranges: <GaugeRange>[
-                              GaugeRange(
-                                  startValue: 0,
-                                  endValue: 50,
-                                  color: Colors.green),
-                              GaugeRange(
-                                  startValue: 50,
-                                  endValue: 100,
-                                  color: Colors.orange),
-                              GaugeRange(
-                                  startValue: 100,
-                                  endValue: 150,
-                                  color: Colors.red)
+                  options: CarouselOptions(height: 800.0),
+                  items: [
+                    Builder(
+                      builder: (BuildContext context) {
+                        return gauge_template(50);
+                      },
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Download Test:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        SizedBox(
+                          height: 200,
+                          child: Builder(
+                            builder: (BuildContext context) {
+                              return gauge_template(downloadRate);
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        if (loadingDownload)
+                          const Column(
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(
+                                height: 10,
+                              ),
                             ],
-                            pointers: <GaugePointer>[
-                              NeedlePointer(value: _pointerValue)
+                          )
+                        else
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              primary: readyToTest && !loadingDownload
+                                  ? Colors.blue
+                                  : Colors.grey,
+                            ),
+                            onPressed: loadingDownload
+                                ? null
+                                : () async {
+                                    if (!readyToTest || bestServersList.isEmpty)
+                                      return;
+                                    await _testDownloadSpeed();
+                                  },
+                            child: const Text('Start'),
+                          ),
+                        const SizedBox(
+                          height: 50,
+                        ),
+                        const Text(
+                          'Upload Test:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        SizedBox(
+                            height: 200,
+                            child: Builder(
+                              builder: (BuildContext context) {
+                                return gauge_template(uploadRate);
+                              },
+                            )),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        if (loadingUpload)
+                          const Column(
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(
+                                height: 10,
+                              ),
                             ],
-                            annotations: <GaugeAnnotation>[
-                              GaugeAnnotation(
-                                  widget: Text(_pointerValue.toStringAsFixed(2),
-                                      style: TextStyle(
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.bold)),
-                                  angle: 90,
-                                  positionFactor: 0.5)
-                            ])
-                      ]);
-                    },
-                  );
-                }).toList(),
-              ),
+                          )
+                        else
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              primary: readyToTest ? Colors.blue : Colors.grey,
+                            ),
+                            onPressed: loadingUpload
+                                ? null
+                                : () async {
+                                    if (!readyToTest || bestServersList.isEmpty)
+                                      return;
+                                    await _testUploadSpeed();
+                                  },
+                            child: const Text('Start'),
+                          ),
+                      ],
+                    ),
+                  ]),
             ),
-            SizedBox(
-              child: StreamBuilder<String>(
-                stream: _streamController.stream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data != null) {
-                    List<Widget> textWidgets = [];
-                    var data = snapshot.data;
-                    print(data);
-                    if (data != null) {
-                      Map<String, dynamic> jsonCodeC = jsonDecode(data);
-                      for (var element in jsonCodeC.values) {
-                        textWidgets.add(Text(
-                          '${element["name"]}' + ' ' + '${element["upload"]}',
-                          style: const TextStyle(fontSize: 16.0),
-                        ));
-                      }
-                    }
-                    return Column(
-                      children: textWidgets,
-                    );
-                  } else {
-                    return const SizedBox();
-                  }
-                },
-              ),
+            Center(
+              child: SizedBox(
+                  width: halfScream,
+                  child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                          color: Color.fromARGB(255, 255, 255, 255)),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 50),
+                        child: StreamBuilder<String>(
+                          stream: _streamController.stream,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData && snapshot.data != null) {
+                              List<ProcessModel> textWidgets = [];
+                              var data = snapshot.data;
+                              if (data != null) {
+                                Map<String, dynamic> jsonCodeC =
+                                    jsonDecode(data);
+                                for (var element in jsonCodeC.values) {
+                                  textWidgets.add(ProcessModel(
+                                    name: element["name"],
+                                    upload: element["upload"],
+                                    download: element["download"],
+                                    uploadSpeed: element["upload_speed"],
+                                    downloadSpeed: element["download_speed"],
+                                  ));
+                                }
+                              }
+                              return createTable(textWidgets);
+                            } else {
+                              return const SizedBox();
+                            }
+                          },
+                        ),
+                      ))),
             ),
           ],
         ),
