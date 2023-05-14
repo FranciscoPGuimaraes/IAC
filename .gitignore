@@ -9,12 +9,12 @@
 .history
 .svn/
 migrate_working_dir/
-linux/
-ios/
-android/
-macos/
-web/
-windows/
+#linux/
+#ios/
+#android/
+#macos/
+#web/
+#windows/
 
 
 # IntelliJ related

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:iac/widgets/gauge.dart';
@@ -24,28 +23,6 @@ class _HomePageState extends State<HomePage> {
   final StreamController<String> _streamController = StreamController<String>();
   SpeedTestDart tester = SpeedTestDart();
   List<Server> bestServersList = [];
-
-  VTable<ProcessModel> createTable(List<ProcessModel> items) {
-    return VTable<ProcessModel>(
-      items: items,
-      tableDescription: '${items.length} items',
-      //startsSorted: true,
-      includeCopyToClipboardAction: true,
-      columns: [
-        VTableColumn(
-          label: 'ID',
-          width: 180,
-          transformFunction: (row) => row.name,
-        ),
-        VTableColumn(
-          label: 'Upload',
-          width: 100,
-          grow: 1,
-          transformFunction: (row) => row.upload,
-        ),
-      ],
-    );
-  }
 
   double downloadRate = 0;
   double uploadRate = 0;

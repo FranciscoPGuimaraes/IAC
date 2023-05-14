@@ -1,5 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:vtable/vtable.dart';
+
+import '../models/ProcessModel.dart';
+
+VTable<ProcessModel> createTable(List<ProcessModel> items) {
+  return VTable<ProcessModel>(
+    items: items,
+    tableDescription: '${items.length} items',
+    //startsSorted: true,
+    includeCopyToClipboardAction: true,
+    columns: [
+      VTableColumn(
+        label: 'ID',
+        width: 180,
+        transformFunction: (row) => row.name,
+      ),
+      VTableColumn(
+        label: 'Upload',
+        width: 100,
+        grow: 1,
+        transformFunction: (row) => row.upload,
+      ),
+    ],
+  );
+}
 
 Widget gauge_template(double value) {
   return SfRadialGauge(axes: <RadialAxis>[
