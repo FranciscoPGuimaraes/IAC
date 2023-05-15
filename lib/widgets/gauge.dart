@@ -1,36 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'package:vtable/vtable.dart';
 
-import '../models/ProcessModel.dart';
-
-VTable<ProcessModel> createTable(List<ProcessModel> items) {
-  return VTable<ProcessModel>(
-    items: items,
-    tableDescription: '${items.length} items',
-    //startsSorted: true,
-    includeCopyToClipboardAction: true,
-    columns: [
-      VTableColumn(
-        label: 'ID',
-        width: 180,
-        transformFunction: (row) => row.name,
-      ),
-      VTableColumn(
-        label: 'Upload',
-        width: 100,
-        grow: 1,
-        transformFunction: (row) => row.upload,
-      ),
-    ],
-  );
-}
-
-Widget gauge_template(double value) {
+Widget gauge_template(double value, int scale, String unit) {
   return SfRadialGauge(axes: <RadialAxis>[
     RadialAxis(
         minimum: 0,
-        maximum: 150,
+        maximum: 150/scale,
         axisLineStyle: AxisLineStyle(
           thickness: 20,
           color: Colors.grey[300],
@@ -62,9 +37,9 @@ Widget gauge_template(double value) {
         annotations: <GaugeAnnotation>[
           GaugeAnnotation(
             widget: Text(
-              value.toStringAsFixed(2),
+              "${value.toStringAsFixed(2+scale-1)} $unit",
               style: const TextStyle(
-                fontSize: 25,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -75,27 +50,27 @@ Widget gauge_template(double value) {
         ranges: <GaugeRange>[
           GaugeRange(
               startValue: 0,
-              endValue: 25,
+              endValue: 25/scale,
               color: const Color.fromARGB(255, 77, 140, 235)),
           GaugeRange(
-              startValue: 25,
-              endValue: 50,
+              startValue: 25/scale,
+              endValue: 50/scale,
               color: const Color.fromARGB(255, 41, 115, 226)),
           GaugeRange(
-              startValue: 50,
-              endValue: 75,
+              startValue: 50/scale,
+              endValue: 75/scale,
               color: const Color.fromARGB(255, 41, 95, 212)),
           GaugeRange(
-              startValue: 75,
-              endValue: 100,
+              startValue: 75/scale,
+              endValue: 100/scale,
               color: const Color.fromARGB(255, 26, 87, 218)),
           GaugeRange(
-              startValue: 100,
-              endValue: 125,
+              startValue: 100/scale,
+              endValue: 125/scale,
               color: const Color.fromARGB(255, 107, 63, 189)),
           GaugeRange(
-              startValue: 125,
-              endValue: 150,
+              startValue: 125/scale,
+              endValue: 150/scale,
               color: const Color.fromARGB(255, 90, 34, 194))
         ])
   ]);

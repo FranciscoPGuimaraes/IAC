@@ -6,11 +6,13 @@ import 'package:iac/widgets/gauge.dart';
 import 'package:flutter/material.dart';
 import 'package:speed_test_dart/classes/classes.dart';
 import 'package:speed_test_dart/speed_test_dart.dart';
-import 'package:vtable/vtable.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
+import '../helpers/converter.dart';
+import '../services/HiveIntegration.dart';
+import '../widgets/table.dart';
 import '/services/SocketConnect.dart';
 import '/models/ProcessModel.dart';
-import '/widgets/gauge.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,7 +22,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var isAscending = true;
+  var sortColumnIndex = 0;
+
+  late final CrudHive crud;
   final StreamController<String> _streamController = StreamController<String>();
+  double _sumDataValue = 0;
   SpeedTestDart tester = SpeedTestDart();
   List<Server> bestServersList = [];
 
@@ -30,6 +37,7 @@ class _HomePageState extends State<HomePage> {
   bool readyToTest = false;
   bool loadingDownload = false;
   bool loadingUpload = false;
+  bool sort = false;
 
   Future<void> setBestServers() async {
     final settings = await tester.getSettings();
@@ -70,17 +78,34 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  saveDataUsed(List<ProcessModel> lista) {
+    final double total = lista.fold<double>(
+        0,
+        (sum, item) =>
+            sum + convertToGb(item.upload) + convertToGb(item.download));
+    setState(() {
+      _sumDataValue = total;
+    });
+  }
+
+  hiveTest() async {
+    await crud.addInfo("Gabriel");
+    await crud.getInfo();
+  }
+
   @override
   initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       connect(_streamController);
+      crud = CrudHive();
       setBestServers();
     });
   }
 
   @override
   void dispose() {
+    crud.close();
     _streamController.close();
     super.dispose();
   }
@@ -98,10 +123,19 @@ class _HomePageState extends State<HomePage> {
               child: CarouselSlider(
                   options: CarouselOptions(height: 800.0),
                   items: [
-                    Builder(
-                      builder: (BuildContext context) {
-                        return gauge_template(50);
-                      },
+                    Column(
+                      children: [
+                        Builder(
+                          builder: (BuildContext context) {
+                            return gauge_template(_sumDataValue, 3, "GB");
+                          },
+                        ),
+                        ElevatedButton(
+                            onPressed: () async {
+                              await hiveTest();
+                            },
+                            child: const Text("Hive"))
+                      ],
                     ),
                     Column(
                       mainAxisSize: MainAxisSize.min,
@@ -120,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                           height: 200,
                           child: Builder(
                             builder: (BuildContext context) {
-                              return gauge_template(downloadRate);
+                              return gauge_template(downloadRate, 1, "Mb/s");
                             },
                           ),
                         ),
@@ -144,8 +178,10 @@ class _HomePageState extends State<HomePage> {
                             onPressed: loadingDownload
                                 ? null
                                 : () async {
-                                    if (!readyToTest || bestServersList.isEmpty)
+                                    if (!readyToTest ||
+                                        bestServersList.isEmpty) {
                                       return;
+                                    }
                                     await _testDownloadSpeed();
                                   },
                             child: const Text('Start'),
@@ -167,7 +203,7 @@ class _HomePageState extends State<HomePage> {
                             height: 200,
                             child: Builder(
                               builder: (BuildContext context) {
-                                return gauge_template(uploadRate);
+                                return gauge_template(uploadRate, 1, "Mb/s");
                               },
                             )),
                         const SizedBox(
@@ -190,8 +226,10 @@ class _HomePageState extends State<HomePage> {
                             onPressed: loadingUpload
                                 ? null
                                 : () async {
-                                    if (!readyToTest || bestServersList.isEmpty)
+                                    if (!readyToTest ||
+                                        bestServersList.isEmpty) {
                                       return;
+                                    }
                                     await _testUploadSpeed();
                                   },
                             child: const Text('Start'),
@@ -207,7 +245,7 @@ class _HomePageState extends State<HomePage> {
                       decoration: const BoxDecoration(
                           color: Color.fromARGB(255, 255, 255, 255)),
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 50),
+                        padding: const EdgeInsets.only(top: 0),
                         child: StreamBuilder<String>(
                           stream: _streamController.stream,
                           builder: (context, snapshot) {
@@ -222,11 +260,14 @@ class _HomePageState extends State<HomePage> {
                                     name: element["name"],
                                     upload: element["upload"],
                                     download: element["download"],
-                                    uploadSpeed: element["upload_speed"],
-                                    downloadSpeed: element["download_speed"],
+                                    //uploadSpeed: element["upload_speed"],
+                                    //downloadSpeed: element["download_speed"],
                                   ));
                                 }
                               }
+                              Future.delayed(Duration.zero, () {
+                                saveDataUsed(textWidgets);
+                              });
                               return createTable(textWidgets);
                             } else {
                               return const SizedBox();

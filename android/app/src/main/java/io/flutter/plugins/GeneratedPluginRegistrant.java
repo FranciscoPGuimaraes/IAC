@@ -2,6 +2,7 @@ package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
 import com.tahamalas.internet_speed_test.InternetSpeedTestPlugin;
+import io.flutter.plugins.pathprovider.PathProviderPlugin;
 
 /**
  * Generated file. Do not edit.
@@ -12,6 +13,7 @@ public final class GeneratedPluginRegistrant {
       return;
     }
     InternetSpeedTestPlugin.registerWith(registry.registrarFor("com.tahamalas.internet_speed_test.InternetSpeedTestPlugin"));
+    PathProviderPlugin.registerWith(registry.registrarFor("io.flutter.plugins.pathprovider.PathProviderPlugin"));
   }
 
   private static boolean alreadyRegisteredWith(PluginRegistry registry) {

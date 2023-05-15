@@ -42,7 +42,11 @@ dependencies:
   syncfusion_flutter_gauges: ^21.2.4
   internet_speed_test: ^1.5.0
   speed_test_dart: ^1.0.4+1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  window_manager: ^0.3.2
   vtable: ^0.2.0
+  syncfusion_flutter_datagrid: ^21.2.4
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +58,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  isar_generator: ^3.1.0+1
+  build_runner: ^2.4.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
