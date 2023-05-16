@@ -603,6 +603,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  simple_gradient_text:
+    dependency: "direct main"
+    description:
+      name: simple_gradient_text
+      sha256: "075a2cbabac021d3713d0d199b2d1b0d40f6293e1e9d37b25e84936ae43c90fa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.4"
   sizer:
     dependency: "direct main"
     description:
@@ -776,13 +784,12 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
-  vtable:
+  vtable_package:
     dependency: "direct main"
     description:
-      name: vtable
-      sha256: "75ddac5c967bb60d819c8dba3d5a3e34676d5033e2b6292617f67e0ae6cbc788"
-      url: "https://pub.dev"
-    source: hosted
+      path: vtable_package
+      relative: true
+    source: path
     version: "0.2.0"
   watcher:
     dependency: transitive

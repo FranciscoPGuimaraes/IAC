@@ -4,12 +4,13 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:iac/widgets/gauge.dart';
 import 'package:flutter/material.dart';
+import 'package:iac/widgets/initialScreen.dart';
 import 'package:speed_test_dart/classes/classes.dart';
 import 'package:speed_test_dart/speed_test_dart.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../helpers/converter.dart';
 import '../services/HiveIntegration.dart';
+import '../widgets/errorMensagem.dart';
 import '../widgets/table.dart';
 import '/services/SocketConnect.dart';
 import '/models/ProcessModel.dart';
@@ -25,8 +26,11 @@ class _HomePageState extends State<HomePage> {
   var isAscending = true;
   var sortColumnIndex = 0;
 
+  CarouselController carouselController = CarouselController();
+
   late final CrudHive crud;
   final StreamController<String> _streamController = StreamController<String>();
+  int _ready = 0;
   double _sumDataValue = 0;
   SpeedTestDart tester = SpeedTestDart();
   List<Server> bestServersList = [];
@@ -93,6 +97,17 @@ class _HomePageState extends State<HomePage> {
     await crud.getInfo();
   }
 
+  runTimer() {
+    Timer(
+      const Duration(seconds: 4),
+      () {
+        setState(() {
+          _ready = 1;
+        });
+      },
+    );
+  }
+
   @override
   initState() {
     super.initState();
@@ -100,6 +115,7 @@ class _HomePageState extends State<HomePage> {
       connect(_streamController);
       crud = CrudHive();
       setBestServers();
+      runTimer();
     });
   }
 
@@ -115,170 +131,223 @@ class _HomePageState extends State<HomePage> {
     final double halfScream = MediaQuery.of(context).size.width / 2;
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SizedBox(
-        child: Row(
-          children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 2,
-              child: CarouselSlider(
-                  options: CarouselOptions(height: 800.0),
-                  items: [
-                    Column(
-                      children: [
-                        Builder(
-                          builder: (BuildContext context) {
-                            return gauge_template(_sumDataValue, 3, "GB");
-                          },
-                        ),
-                        ElevatedButton(
-                            onPressed: () async {
-                              await hiveTest();
-                            },
-                            child: const Text("Hive"))
-                      ],
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'Download Test:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        SizedBox(
-                          height: 200,
-                          child: Builder(
-                            builder: (BuildContext context) {
-                              return gauge_template(downloadRate, 1, "Mb/s");
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        if (loadingDownload)
-                          const Column(
-                            children: [
-                              CircularProgressIndicator(),
-                              SizedBox(
-                                height: 10,
-                              ),
-                            ],
-                          )
-                        else
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              primary: readyToTest && !loadingDownload
-                                  ? Colors.blue
-                                  : Colors.grey,
-                            ),
-                            onPressed: loadingDownload
-                                ? null
-                                : () async {
-                                    if (!readyToTest ||
-                                        bestServersList.isEmpty) {
-                                      return;
-                                    }
-                                    await _testDownloadSpeed();
+      body: _ready == 0
+          ? allInitialScreen()
+          : Container(
+              width: 1200,
+              height: 700,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/background_image.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: halfScream / 1.15,
+                    child: Stack(children: [
+                      CarouselSlider(
+                          carouselController: carouselController,
+                          options: CarouselOptions(height: 800.0),
+                          items: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Builder(
+                                  builder: (BuildContext context) {
+                                    return gauge_template(
+                                        _sumDataValue, 1, "GB");
                                   },
-                            child: const Text('Start'),
-                          ),
-                        const SizedBox(
-                          height: 50,
-                        ),
-                        const Text(
-                          'Upload Test:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        SizedBox(
-                            height: 200,
-                            child: Builder(
-                              builder: (BuildContext context) {
-                                return gauge_template(uploadRate, 1, "Mb/s");
+                                ),
+                              ],
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'Download Test:',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                Stack(children: [
+                                  SizedBox(
+                                        height: 200,
+                                        child: Builder(
+                                          builder: (BuildContext context) {
+                                            return gauge_template(
+                                                downloadRate, 2, "Mb/s");
+                                          },
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: Padding(
+                                          padding: EdgeInsets.only(top: 150),
+                                      child: loadingDownload
+                                        ? const Column(
+                                          children: [
+                                            CircularProgressIndicator(),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                          ],
+                                        )
+                                      : ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            primary: readyToTest && !loadingDownload
+                                                ? Colors.blue
+                                                : Colors.grey,
+                                          ),
+                                          onPressed: loadingDownload
+                                              ? null
+                                              : () async {
+                                                  if (!readyToTest ||
+                                                      bestServersList.isEmpty) {
+                                                    return;
+                                                  }
+                                                  await _testDownloadSpeed();
+                                                },
+                                          child: const Text('Testar'),
+                                        ),
+                                      ))
+                                ],),
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                const Text(
+                                  'Upload Test:',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                
+                                Stack(children: [
+                                  SizedBox(
+                                        height: 200,
+                                        child: Builder(
+                                          builder: (BuildContext context) {
+                                            return gauge_template(
+                                                uploadRate, 2, "Mb/s");
+                                          },
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: Padding(
+                                          padding: EdgeInsets.only(top: 150),
+                                      child: loadingUpload
+                                        ? const Column(
+                                          children: [
+                                            CircularProgressIndicator(),
+                                            SizedBox(
+                                              height: 10,
+                                            ),
+                                          ],
+                                        )
+                                      : ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            primary: readyToTest && !loadingUpload
+                                                ? Colors.blue
+                                                : Colors.grey,
+                                          ),
+                                          onPressed: loadingUpload
+                                              ? null
+                                              : () async {
+                                                  if (!readyToTest ||
+                                                      bestServersList.isEmpty) {
+                                                    return;
+                                                  }
+                                                  await _testUploadSpeed();
+                                                },
+                                          child: const Text('Testar'),
+                                        ),
+                                      ))
+                                ],),
+                              ],
+                            ),
+                          ]),
+                      Padding(
+                          padding: const EdgeInsets.only(top: 40, left: 80),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              color: const Color.fromRGBO(135, 135, 135, 1),
+                              onPressed: () {
+                                carouselController.previousPage();
                               },
-                            )),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        if (loadingUpload)
-                          const Column(
-                            children: [
-                              CircularProgressIndicator(),
-                              SizedBox(
-                                height: 10,
-                              ),
-                            ],
-                          )
-                        else
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              primary: readyToTest ? Colors.blue : Colors.grey,
+                              icon: const Icon(Icons.navigate_before),
                             ),
-                            onPressed: loadingUpload
-                                ? null
-                                : () async {
-                                    if (!readyToTest ||
-                                        bestServersList.isEmpty) {
-                                      return;
+                          )),
+                      Padding(
+                          padding: const EdgeInsets.only(top: 40, right: 80),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              color: const Color.fromRGBO(135, 135, 135, 1),
+                              onPressed: () {
+                                carouselController.nextPage();
+                              },
+                              icon: const Icon(Icons.navigate_next),
+                            ),
+                          )),
+                    ]),
+                  ),
+                  Center(
+                    child: SizedBox(
+                        width: halfScream / 1.3,
+                        child: DecoratedBox(
+                            decoration: const BoxDecoration(
+                                color: Color.fromRGBO(255, 255, 255, 0)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 0),
+                              child: StreamBuilder<String>(
+                                stream: _streamController.stream,
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data != null &&
+                                      snapshot.connectionState ==
+                                          ConnectionState.active) {
+                                    List<ProcessModel> textWidgets = [];
+                                    var data = snapshot.data;
+                                    if (data != null) {
+                                      Map<String, dynamic> jsonCodeC =
+                                          jsonDecode(data);
+                                      for (var element in jsonCodeC.values) {
+                                        textWidgets.add(ProcessModel(
+                                          name: element["name"],
+                                          upload: element["upload"],
+                                          download: element["download"],
+                                          //uploadSpeed: element["upload_speed"],
+                                          //downloadSpeed: element["download_speed"],
+                                        ));
+                                      }
                                     }
-                                    await _testUploadSpeed();
-                                  },
-                            child: const Text('Start'),
-                          ),
-                      ],
-                    ),
-                  ]),
+                                    //print(textWidgets);
+                                    return Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 100, bottom: 100),
+                                        child: createTable(textWidgets));
+                                  } else {
+                                    return errorMensage();
+                                  }
+                                },
+                              ),
+                            ))),
+                  ),
+                ],
+              ),
             ),
-            Center(
-              child: SizedBox(
-                  width: halfScream,
-                  child: DecoratedBox(
-                      decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 255, 255, 255)),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 0),
-                        child: StreamBuilder<String>(
-                          stream: _streamController.stream,
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData && snapshot.data != null) {
-                              List<ProcessModel> textWidgets = [];
-                              var data = snapshot.data;
-                              if (data != null) {
-                                Map<String, dynamic> jsonCodeC =
-                                    jsonDecode(data);
-                                for (var element in jsonCodeC.values) {
-                                  textWidgets.add(ProcessModel(
-                                    name: element["name"],
-                                    upload: element["upload"],
-                                    download: element["download"],
-                                    //uploadSpeed: element["upload_speed"],
-                                    //downloadSpeed: element["download_speed"],
-                                  ));
-                                }
-                              }
-                              Future.delayed(Duration.zero, () {
-                                saveDataUsed(textWidgets);
-                              });
-                              return createTable(textWidgets);
-                            } else {
-                              return const SizedBox();
-                            }
-                          },
-                        ),
-                      ))),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

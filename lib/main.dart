@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "teste",
+      title: "Viasat Monitor",
       initialRoute: '/',//onde vai comecar o app
       routes: {
         '/': (context) => const HomePage(),
