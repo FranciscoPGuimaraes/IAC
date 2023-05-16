@@ -35,7 +35,7 @@ class _AppPageState extends State<AppPage> {
                   SizedBox(
                     width: 100,
                     height: 100,
-                    child: Image.asset('assets/images/instagram.png'),
+                    child: Image.asset('assets/icons/insta.png'),
                   )
                 ],
               ),

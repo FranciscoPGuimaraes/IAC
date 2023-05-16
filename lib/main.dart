@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'screens/AppPageScreen.dart';
 import 'screens/HomePageScreen.dart';
+import 'screens/configPageScreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,9 +24,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "Viasat Monitor",
-      initialRoute: '/',//onde vai comecar o app
+      initialRoute: '/app',//onde vai comecar o app
       routes: {
         '/': (context) => const HomePage(),
+        '/app': (context) => const AppPage(),
+        '/config': (context) => const ConfigPage(),
       },
       //},
     );

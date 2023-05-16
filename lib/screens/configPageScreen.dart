@@ -43,7 +43,7 @@ class _ConfigPageState extends State<ConfigPage> {
                   SizedBox(
                     width: 100,
                     height: 100,
-                    child: Image.asset('assets/images/quadrado.png'),
+                    child: Image.asset('assets/icons/default.png'),
                   )
                 ],
               ),
