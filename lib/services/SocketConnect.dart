@@ -14,6 +14,18 @@ void connect(StreamController<String> streamController) async {
   }
 }
 
+void connect2(StreamController<String> streamController) async {
+  try {
+    var futures = <Future>[];
+    //futures.add(handleSocketConnection(50000, streamController));
+    futures.add(handleSocketConnection(50001, streamController));
+    //futures.add(handleSocketConnection(50002, streamController));
+    await Future.wait(futures);
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+
 Future<void> handleSocketConnection(
     int port, StreamController<String> streamController) async {
   try {
@@ -24,7 +36,7 @@ Future<void> handleSocketConnection(
       String receivedData = String.fromCharCodes(data);
       receivedData = receivedData.substring(1);
       receivedData = receivedData.replaceAll("'","");
-      
+      //print(receivedData);
       var json = jsonDecode(receivedData);
 
       //print('Received from port $port: $receivedData');

@@ -9,7 +9,6 @@ import 'package:speed_test_dart/speed_test_dart.dart';
 
 import '../helpers/converter.dart';
 import '../models/ConfigPageModel.dart';
-import '../models/DetailsPageModel.dart';
 import '../services/HiveIntegration.dart';
 import '../widgets/errorMensagem.dart';
 import '../widgets/table.dart';
@@ -140,7 +139,7 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             Padding(
-              padding: EdgeInsets.all(40),
+              padding: const EdgeInsets.all(40),
               child: SizedBox(
                 child: Image.asset("assets/images/viasatlogo.png"),
               ),
@@ -149,20 +148,18 @@ class _HomePageState extends State<HomePage> {
               height: 20,
             ),
             ListTile(
-              leading: Icon(Icons.admin_panel_settings),
-              title: Text("Configuração"),
+              leading: const Icon(Icons.admin_panel_settings),
+              title: const Text("Configuração"),
               onTap: () {
                 Navigator.of(context).pushNamed('/config',
                     arguments: ConfigScreenArguments(_sumDataValue));
               },
             ),
             ListTile(
-              leading: Icon(Icons.pageview),
-              title: Text("Detalhes"),
+              leading: const Icon(Icons.pageview),
+              title: const Text("Detalhes"),
               onTap: () {
-                Navigator.of(context).pushNamed('/details',
-                    arguments: DetailsScreenArguments(
-                        2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0));
+                Navigator.of(context).pushNamed('/details');
               },
             ),
           ],
@@ -264,9 +261,9 @@ class _HomePageState extends State<HomePage> {
                                               : ElevatedButton(
                                                   style:
                                                       ElevatedButton.styleFrom(
-                                                    primary: readyToTest &&
+                                                    backgroundColor: readyToTest &&
                                                             !loadingDownload
-                                                        ? Color.fromRGBO(
+                                                        ? const Color.fromRGBO(
                                                             65, 84, 249, 1)
                                                         : Colors.grey,
                                                   ),
@@ -326,9 +323,9 @@ class _HomePageState extends State<HomePage> {
                                               : ElevatedButton(
                                                   style:
                                                       ElevatedButton.styleFrom(
-                                                    primary: readyToTest &&
+                                                    backgroundColor: readyToTest &&
                                                             !loadingUpload
-                                                        ? Color.fromRGBO(
+                                                        ? const Color.fromRGBO(
                                                             65, 84, 249, 1)
                                                         : Colors.grey,
                                                   ),

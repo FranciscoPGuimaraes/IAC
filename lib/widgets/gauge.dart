@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
@@ -36,7 +34,7 @@ Widget gauge_template(double value, double scale, String unit) {
         fontSize: 16,
         color: Color.fromRGBO(190, 190, 190, 1),
       ),
-      radiusFactor: 1,
+      radiusFactor: 0.9,
       showTicks: false,
       showLabels: true,
       showLastLabel: true,
@@ -51,7 +49,7 @@ Widget gauge_template(double value, double scale, String unit) {
           needleEndWidth: 1,
           lengthUnit: GaugeSizeUnit.factor,
           needleLength: 0.8,
-          knobStyle: KnobStyle(
+          knobStyle: const KnobStyle(
             knobRadius: 0.08,
             sizeUnit: GaugeSizeUnit.factor,
             borderColor: Color.fromRGBO(10, 2, 32, 0),
@@ -83,14 +81,14 @@ Widget gauge_template(double value, double scale, String unit) {
       axisLineStyle: AxisLineStyle(
         cornerStyle: CornerStyle.bothFlat,
         thickness: scale == 1 ? 10 : 7,
-        color: Color.fromARGB(255, 237, 237, 237),
+        color: const Color.fromARGB(255, 237, 237, 237),
       ),
-      radiusFactor: scale == 1 ? 0.85 : 0.78,
+      radiusFactor: scale == 1 ? 0.74 : 0.64,
       showTicks: false,
       showLabels: false,
       showLastLabel: false,
       labelsPosition: ElementsPosition.outside,
-      pointers: <GaugePointer>[
+      pointers: const <GaugePointer>[
         NeedlePointer(
           needleColor: Colors.white,
           needleLength: 0,

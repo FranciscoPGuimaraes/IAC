@@ -1,8 +1,15 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:ViasatMonitor/models/ProtocolChartModel.dart';
+import 'package:ViasatMonitor/widgets/chart.dart';
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
+import '../helpers/converter.dart';
 import '../models/DetailsPageModel.dart';
+import '../services/SocketConnect.dart';
 
 class DetailsPage extends StatefulWidget {
   const DetailsPage({super.key});
@@ -12,7 +19,22 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
+  final StreamController<String> _streamController = StreamController<String>();
   bool ligado = true;
+
+  @override
+    initState() {
+      super.initState();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        connect2(_streamController);
+      });
+    }
+
+    @override
+    void dispose() {
+      super.dispose();
+      _streamController.close();
+    }
 
   final gradientList = <List<Color>>[
     [
@@ -39,19 +61,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as DetailsScreenArguments;
     final double halfScream = MediaQuery.of(context).size.height / 2;
-
-    Map<String, double> dataMapProtocol = {
-      "WWW": args.WWW,
-      "HTTP": args.HTTP,
-      "SSDP": args.SSDP,
-      "DOMAIN": args.DOMAIN,
-      "HTTPS": args.HTTPS,
-      "DNS": args.DNS,
-      "others": args.others,
-    };
 
     Map<String, double> dataMapHost = {
       "Host1": 1,
@@ -117,89 +127,43 @@ class _DetailsPageState extends State<DetailsPage> {
                               ),
                               child: Row(
                                 children: [
-                                  PieChart(
-                                    dataMap: dataMapProtocol,
-                                    animationDuration:
-                                        Duration(milliseconds: 800),
-                                    chartLegendSpacing: 32,
-                                    chartRadius:
-                                        MediaQuery.of(context).size.width / 3.2,
-                                    colorList: [
-                                      Color.fromRGBO(28, 54, 69, 1),
-                                      Color.fromRGBO(0, 98, 139, 1),
-                                      Color.fromRGBO(0, 137, 195, 1),
-                                      Color.fromRGBO(0, 159, 226, 1),
-                                      Color.fromRGBO(99, 188, 135, 1),
-                                      Color.fromRGBO(139, 200, 98, 1),
-                                      Color.fromRGBO(181, 212, 59, 1)
-                                    ],
-                                    emptyColorGradient: [
-                                      Color(0xff6c5ce7),
-                                      Colors.blue,
-                                    ],
-                                    initialAngleInDegree: 0,
-                                    chartType: ChartType.disc,
-                                    ringStrokeWidth: 32,
-                                    centerText: "PROTOCOL",
-                                    legendOptions: LegendOptions(
-                                      showLegendsInRow: false,
-                                      legendPosition: LegendPosition.right,
-                                      showLegends: true,
-                                      legendTextStyle: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    chartValuesOptions: ChartValuesOptions(
-                                      showChartValueBackground: true,
-                                      showChartValues: true,
-                                      showChartValuesInPercentage: false,
-                                      showChartValuesOutside: false,
-                                      decimalPlaces: 1,
-                                    ),
+                                  StreamBuilder<String>(
+                                    stream: _streamController.stream,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData &&
+                                          snapshot.data != null &&
+                                          snapshot.connectionState ==
+                                              ConnectionState.active) {
+                                        Map<String, double> chartWidget = {};
+                                        var data = snapshot.data;
+                                        if (data != null) {
+                                          Map<String, dynamic> jsonCodeC =
+                                              jsonDecode(data);
+                                          for (var key in jsonCodeC.keys) {
+                                            bool firstConsult = true;
+                                            for(var value in jsonCodeC[key].values) {
+                                              if(firstConsult){
+                                                chartWidget[key] = ProtocolChartModel(total: convertToMb(value)).total;
+                                                firstConsult=false;
+                                              }
+                                            }
+                                          }
+                                        }
+                                        return createChart(
+                                            "PROTOCOLOS",
+                                            chartWidget,
+                                            MediaQuery.of(context).size.width /
+                                                3.2);
+                                      } else {
+                                        return SizedBox();
+                                      }
+                                    },
                                   ),
                                   SizedBox(
                                     width: 80,
                                   ),
-                                  PieChart(
-                                    dataMap: dataMapHost,
-                                    animationDuration:
-                                        Duration(milliseconds: 800),
-                                    chartLegendSpacing: 32,
-                                    chartRadius:
-                                        MediaQuery.of(context).size.width / 3.2,
-                                    colorList: [
-                                      Color.fromRGBO(28, 54, 69, 1),
-                                      Color.fromRGBO(0, 98, 139, 1),
-                                      Color.fromRGBO(0, 137, 195, 1),
-                                      Color.fromRGBO(0, 159, 226, 1),
-                                      Color.fromRGBO(99, 188, 135, 1),
-                                      Color.fromRGBO(139, 200, 98, 1),
-                                      Color.fromRGBO(181, 212, 59, 1)
-                                    ],
-                                    emptyColorGradient: [
-                                      Color(0xff6c5ce7),
-                                      Colors.blue,
-                                    ],
-                                    initialAngleInDegree: 0,
-                                    chartType: ChartType.disc,
-                                    ringStrokeWidth: 32,
-                                    centerText: "HOST",
-                                    legendOptions: LegendOptions(
-                                      showLegendsInRow: false,
-                                      legendPosition: LegendPosition.right,
-                                      showLegends: true,
-                                      legendTextStyle: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    chartValuesOptions: ChartValuesOptions(
-                                      showChartValueBackground: true,
-                                      showChartValues: true,
-                                      showChartValuesInPercentage: false,
-                                      showChartValuesOutside: false,
-                                      decimalPlaces: 1,
-                                    ),
-                                  )
+                                  createChart("HOST", dataMapHost,
+                                      MediaQuery.of(context).size.width / 3.2),
                                 ],
                               ),
                             )
