@@ -1,19 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:ViasatMonitor/widgets/confirmationExit.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:iac/widgets/gauge.dart';
 import 'package:flutter/material.dart';
-import 'package:iac/widgets/initialScreen.dart';
 import 'package:speed_test_dart/classes/classes.dart';
 import 'package:speed_test_dart/speed_test_dart.dart';
 
 import '../helpers/converter.dart';
+import '../models/ConfigPageModel.dart';
+import '../models/DetailsPageModel.dart';
 import '../services/HiveIntegration.dart';
 import '../widgets/errorMensagem.dart';
 import '../widgets/table.dart';
-import '/services/SocketConnect.dart';
-import '/models/ProcessModel.dart';
+import '../widgets/gauge.dart';
+import '../widgets/initialScreen.dart';
+import '../services/SocketConnect.dart';
+import '../models/ProcessModel.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -83,7 +86,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   saveDataUsed(List<ProcessModel> lista) {
-    final double total = lista.fold<double>(
+    double total = lista.fold<double>(
         0,
         (sum, item) =>
             sum + convertToGb(item.upload) + convertToGb(item.download));
@@ -122,14 +125,59 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     crud.close();
-    _streamController.close();
+    //_streamController.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    windowClose(context, _streamController);
+
     final double halfScream = MediaQuery.of(context).size.width / 2;
     return Scaffold(
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(40),
+              child: SizedBox(
+                child: Image.asset("assets/images/viasatlogo.png"),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            ListTile(
+              leading: Icon(Icons.admin_panel_settings),
+              title: Text("Configuração"),
+              onTap: () {
+                Navigator.of(context).pushNamed('/config',
+                    arguments: ConfigScreenArguments(_sumDataValue));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.pageview),
+              title: Text("Detalhes"),
+              onTap: () {
+                Navigator.of(context).pushNamed('/details',
+                    arguments: DetailsScreenArguments(
+                        2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0));
+              },
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: Builder(builder: (context) {
+        return _ready == 1
+            ? FloatingActionButton(
+                foregroundColor: Colors.transparent,
+                child: Image.asset("assets/images/barra_menu.png"),
+                onPressed: () =>
+                    Scaffold.of(context).openDrawer(), // <-- Opens drawer.
+              )
+            : const SizedBox();
+      }),
       backgroundColor: Colors.white,
       body: _ready == 0
           ? allInitialScreen()
@@ -149,16 +197,28 @@ class _HomePageState extends State<HomePage> {
                     child: Stack(children: [
                       CarouselSlider(
                           carouselController: carouselController,
-                          options: CarouselOptions(height: 800.0),
+                          options: CarouselOptions(height: 1000.0),
                           items: [
                             Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                const Text(
+                                  "Dados gastos",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 19),
+                                ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
                                 Builder(
                                   builder: (BuildContext context) {
                                     return gauge_template(
                                         _sumDataValue, 1, "GB");
                                   },
+                                ),
+                                const SizedBox(
+                                  height: 40,
                                 ),
                               ],
                             ),
@@ -167,113 +227,126 @@ class _HomePageState extends State<HomePage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Text(
-                                  'Download Test:',
+                                  'Velocidade de Download:',
                                   style: TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(
                                   height: 5,
                                 ),
-                                Stack(children: [
-                                  SizedBox(
-                                        height: 200,
-                                        child: Builder(
-                                          builder: (BuildContext context) {
-                                            return gauge_template(
-                                                downloadRate, 2, "Mb/s");
-                                          },
-                                        ),
+                                Stack(
+                                  children: [
+                                    SizedBox(
+                                      height: 200,
+                                      child: Builder(
+                                        builder: (BuildContext context) {
+                                          return gauge_template(
+                                              downloadRate, 1.5, "Mb/s");
+                                        },
                                       ),
-                                      Align(
+                                    ),
+                                    Align(
                                         alignment: Alignment.bottomCenter,
                                         child: Padding(
-                                          padding: EdgeInsets.only(top: 150),
-                                      child: loadingDownload
-                                        ? const Column(
-                                          children: [
-                                            CircularProgressIndicator(),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                          ],
-                                        )
-                                      : ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            primary: readyToTest && !loadingDownload
-                                                ? Colors.blue
-                                                : Colors.grey,
-                                          ),
-                                          onPressed: loadingDownload
-                                              ? null
-                                              : () async {
-                                                  if (!readyToTest ||
-                                                      bestServersList.isEmpty) {
-                                                    return;
-                                                  }
-                                                  await _testDownloadSpeed();
-                                                },
-                                          child: const Text('Testar'),
-                                        ),
-                                      ))
-                                ],),
+                                          padding:
+                                              const EdgeInsets.only(top: 150),
+                                          child: loadingDownload
+                                              ? const Column(
+                                                  children: [
+                                                    CircularProgressIndicator(),
+                                                    SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                  ],
+                                                )
+                                              : ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    primary: readyToTest &&
+                                                            !loadingDownload
+                                                        ? Color.fromRGBO(
+                                                            65, 84, 249, 1)
+                                                        : Colors.grey,
+                                                  ),
+                                                  onPressed: loadingDownload
+                                                      ? null
+                                                      : () async {
+                                                          if (!readyToTest ||
+                                                              bestServersList
+                                                                  .isEmpty) {
+                                                            return;
+                                                          }
+                                                          await _testDownloadSpeed();
+                                                        },
+                                                  child: const Text('Testar'),
+                                                ),
+                                        ))
+                                  ],
+                                ),
                                 const SizedBox(
                                   height: 15,
                                 ),
                                 const Text(
-                                  'Upload Test:',
+                                  'Velocidade de Upload',
                                   style: TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(
                                   height: 5,
                                 ),
-                                
-                                Stack(children: [
-                                  SizedBox(
-                                        height: 200,
-                                        child: Builder(
-                                          builder: (BuildContext context) {
-                                            return gauge_template(
-                                                uploadRate, 2, "Mb/s");
-                                          },
-                                        ),
+                                Stack(
+                                  children: [
+                                    SizedBox(
+                                      height: 200,
+                                      child: Builder(
+                                        builder: (BuildContext context) {
+                                          return gauge_template(
+                                              uploadRate, 1.5, "Mb/s");
+                                        },
                                       ),
-                                      Align(
+                                    ),
+                                    Align(
                                         alignment: Alignment.bottomCenter,
                                         child: Padding(
-                                          padding: EdgeInsets.only(top: 150),
-                                      child: loadingUpload
-                                        ? const Column(
-                                          children: [
-                                            CircularProgressIndicator(),
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                          ],
-                                        )
-                                      : ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            primary: readyToTest && !loadingUpload
-                                                ? Colors.blue
-                                                : Colors.grey,
-                                          ),
-                                          onPressed: loadingUpload
-                                              ? null
-                                              : () async {
-                                                  if (!readyToTest ||
-                                                      bestServersList.isEmpty) {
-                                                    return;
-                                                  }
-                                                  await _testUploadSpeed();
-                                                },
-                                          child: const Text('Testar'),
-                                        ),
-                                      ))
-                                ],),
+                                          padding:
+                                              const EdgeInsets.only(top: 150),
+                                          child: loadingUpload
+                                              ? const Column(
+                                                  children: [
+                                                    CircularProgressIndicator(),
+                                                    SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                  ],
+                                                )
+                                              : ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    primary: readyToTest &&
+                                                            !loadingUpload
+                                                        ? Color.fromRGBO(
+                                                            65, 84, 249, 1)
+                                                        : Colors.grey,
+                                                  ),
+                                                  onPressed: loadingUpload
+                                                      ? null
+                                                      : () async {
+                                                          if (!readyToTest ||
+                                                              bestServersList
+                                                                  .isEmpty) {
+                                                            return;
+                                                          }
+                                                          await _testUploadSpeed();
+                                                        },
+                                                  child: const Text('Testar'),
+                                                ),
+                                        ))
+                                  ],
+                                ),
                               ],
                             ),
                           ]),
@@ -305,7 +378,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Center(
                     child: SizedBox(
-                        width: halfScream / 1.3,
+                        width: halfScream / 1.2,
                         child: DecoratedBox(
                             decoration: const BoxDecoration(
                                 color: Color.fromRGBO(255, 255, 255, 0)),
@@ -334,6 +407,9 @@ class _HomePageState extends State<HomePage> {
                                       }
                                     }
                                     //print(textWidgets);
+                                    Future.delayed(Duration.zero, () {
+                                      saveDataUsed(textWidgets);
+                                    });
                                     return Padding(
                                         padding: const EdgeInsets.only(
                                             top: 100, bottom: 100),

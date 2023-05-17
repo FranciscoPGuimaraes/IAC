@@ -1,4 +1,4 @@
-name: iac
+name: ViasatMonitor
 description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
@@ -51,6 +51,11 @@ dependencies:
     path: ./vtable_package
   fl_chart: ^0.62.0
   percent_indicator: ^4.2.3
+  path_provider: ^2.0.15
+  flutter_window_close: ^0.2.2
+  url_launcher: ^6.1.11
+  sidebarx: ^0.15.0
+  pie_chart: ^5.3.2
   
 dev_dependencies:
   flutter_test:
@@ -81,9 +86,15 @@ flutter:
     - assets/images/viasatlogo.png
     - assets/images/error_icon.png
     - assets/images/background_image.jpg
+    - assets/images/barra_menu.png
 
-    - assets/icons/insta.png
+    - assets/icons/brave.png
     - assets/icons/default.png
+    - assets/icons/discord.png
+    - assets/icons/dart.png
+    - assets/icons/teams.webp
+    - assets/icons/code.webp
+    - assets/icons/win.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

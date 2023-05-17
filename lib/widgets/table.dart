@@ -8,15 +8,15 @@ import '../helpers/converter.dart';
 
 VTable<ProcessModel> createTable(List<ProcessModel> items) {
   return VTable<ProcessModel>(
-    //supportsSelection: true,
     items: items,
     //tableDescription: '${items.length} items',
     startsSorted: true,
+    supportsSelection: true,
     columns: [
       VTableColumn(
         label: 'Processo',
         width: 100,
-        grow: 0.5,
+        grow: 2,
         transformFunction: (row) => row.name,
         compareFunction: (a, b) => sumAndConvertToMb(b.download, b.upload).compareTo(sumAndConvertToMb(a.download, a.upload)),
       ),
@@ -38,22 +38,22 @@ VTable<ProcessModel> createTable(List<ProcessModel> items) {
           final media = items.fold<double>(0, (sum, item) => sum + sumAndConvertToMb(item.download, item.upload))/items.length;
           if(sumAndConvertToMb(data.upload, data.download) > total){
             return const Chip(
-              label: SizedBox(width: 100, height: 5),
-              labelPadding: EdgeInsets.all(-2),
-              backgroundColor: Colors.red,
+              label: SizedBox(width: 90, height: 5),
+              labelPadding: EdgeInsets.all(-5),
+              backgroundColor: Color.fromRGBO(254, 0, 0, 1),
             );
           } else if (sumAndConvertToMb(data.upload, data.download) > media) {
             return const Chip(
-              label: SizedBox(width: 100, height: 5),
-              labelPadding: EdgeInsets.all(-2),
-              backgroundColor: Colors.yellow,
+              label: SizedBox(width: 90, height: 5),
+              labelPadding: EdgeInsets.all(-5),
+              backgroundColor: Color.fromRGBO(255, 133, 52, 1),
             );
           }
            else {
             return const Chip(
-              label: SizedBox(width: 100, height: 5),
-              labelPadding: EdgeInsets.all(-2),
-              backgroundColor: Colors.blue,
+              label: SizedBox(width: 90, height: 5),
+              labelPadding: EdgeInsets.all(-5),
+              backgroundColor: Color.fromRGBO(65, 84, 249, 1),
             );
           }
         },

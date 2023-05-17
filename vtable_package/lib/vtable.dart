@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import './src/copy_action.dart';
 import './constants/names.dart';
 
+import 'models/AppPageModel.dart';
+import 'models/ProcessModel2.dart';
 import 'src/theme.dart';
 
 // Verify the Constants file to find the icon for the process
@@ -16,24 +18,29 @@ findConstant(String process) {
   }
 }
 
+navegate(ProcessModel2 p) {
+  return p.name;
+}
+
 /// A callback to react to row taps.
-typedef ItemTapHandler<T> = void Function(T object);
+typedef ItemTapHandler<ProcessModel> = void Function(ProcessModel object);
 
 /// A callback to react to table row selection changes.
-typedef OnSelectionChanged<T> = void Function(T? selectedItem);
+typedef OnSelectionChanged<ProcessModel> = void Function(
+    ProcessModel? selectedItem);
 
 /// A Flutter table widget featuring virtualization, sorting, and custom cell
 /// rendering.
-class VTable<T> extends StatefulWidget {
+class VTable<ProcessModel> extends StatefulWidget {
   static const double _rowHeight = 42;
   static const double _vertPadding = 4;
   static const double _horizPadding = 8;
 
   /// The list of data rows for the table.
-  final List<T> items;
+  final List<ProcessModel> items;
 
   /// The list of columns to display for the table.
-  final List<VTableColumn<T>> columns;
+  final List<VTableColumn<ProcessModel>> columns;
 
   /// Whether the table should initially sort the rows.
   final bool startsSorted;
@@ -42,10 +49,10 @@ class VTable<T> extends StatefulWidget {
   final bool supportsSelection;
 
   /// A callback used to react to a double tap on a table row.
-  final ItemTapHandler<T>? onDoubleTap;
+  final ItemTapHandler<ProcessModel>? onDoubleTap;
 
   /// A callback used to react to table selection changes.
-  final OnSelectionChanged<T>? onSelectionChanged;
+  final OnSelectionChanged<ProcessModel>? onSelectionChanged;
 
   /// A optional description of the table.
   ///
@@ -121,15 +128,15 @@ class VTable<T> extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<VTable> createState() => _VTableState<T>();
+  State<VTable> createState() => _VTableState<ProcessModel>();
 }
 
-class _VTableState<T> extends State<VTable<T>> {
+class _VTableState<ProcessModel> extends State<VTable<ProcessModel>> {
   late ScrollController scrollController;
-  late List<T> sortedItems;
+  late List<ProcessModel> sortedItems;
   int? sortColumnIndex;
   bool sortAscending = true;
-  final ValueNotifier<T?> selectedItem = ValueNotifier(null);
+  final ValueNotifier<ProcessModel?> selectedItem = ValueNotifier(null);
 
   @override
   void initState() {
@@ -148,7 +155,7 @@ class _VTableState<T> extends State<VTable<T>> {
   }
 
   @override
-  void didUpdateWidget(VTable<T> oldWidget) {
+  void didUpdateWidget(VTable<ProcessModel> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     sortedItems = widget.items;
@@ -168,7 +175,7 @@ class _VTableState<T> extends State<VTable<T>> {
     }
   }
 
-  List<VTableColumn<T>> get columns => widget.columns;
+  List<VTableColumn<ProcessModel>> get columns => widget.columns;
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +211,7 @@ class _VTableState<T> extends State<VTable<T>> {
             const SizedBox(height: toolbarHeight, child: VerticalDivider()));
       }
 
-      extraActions.add(CopyToClipboardAction<T>());
+      extraActions.add(CopyToClipboardAction<ProcessModel>());
     }
 
     return Padding(
@@ -233,8 +240,7 @@ class _VTableState<T> extends State<VTable<T>> {
     return Row(
       children: [
         for (var column in columns)
-          InkWell(
-            onTap: () => trySort(column),
+          Container(
             child: _ColumnHeader(
               title: column.label,
               icon: column.icon,
@@ -257,49 +263,55 @@ class _VTableState<T> extends State<VTable<T>> {
       itemCount: sortedItems.length,
       itemExtent: VTable._rowHeight,
       itemBuilder: (BuildContext context, int index) {
-        T item = sortedItems[index];
+        ProcessModel item = sortedItems[index];
         final selected = item == selectedItem.value;
-        return Container(
-          key: ValueKey(item),
-          color: selected ? Theme.of(context).hoverColor : null,
-          child: InkWell(
-            onTap: () => _select(item),
-            onDoubleTap: () => _doubleTap(item),
-            child: DecoratedBox(
-              decoration: rowSeparator,
-              child: Row(
-                children: [
-                  for (var column in columns)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 1, right: 1),
-                      child: SizedBox(
-                        height: VTable._rowHeight - 1,
-                        width: colWidths[column]! - 1,
-                        child: Tooltip(
-                          message: column.validate(item)?.message ?? '',
-                          waitDuration: widget.tooltipDelay,
-                          child: Container(
-                            alignment: column.alignment ?? Alignment.centerLeft,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: VTable._horizPadding,
-                              vertical: VTable._vertPadding,
+        return GestureDetector(
+            onTap: () {
+              final data = ProcessModel2.toProcessModel2(item);
+              Navigator.of(context).pushNamed(
+                '/app',
+                arguments: AppScreenArguments(data.name, data.download, data.upload),
+              );
+              //Navigator.of(context).pushNamed('/app', arguments: (ProcessModel2.toProcessModel2(item)));
+            },
+            child: Container(
+              key: ValueKey(item),
+              color: selected ? Theme.of(context).hoverColor : null,
+              child: DecoratedBox(
+                decoration: rowSeparator,
+                child: Row(
+                  children: [
+                    for (var column in columns)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 1, right: 1),
+                        child: SizedBox(
+                            height: VTable._rowHeight - 1,
+                            width: colWidths[column]! - 1,
+                            child: Container(
+                              alignment:
+                                  column.alignment ?? Alignment.centerLeft,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: VTable._horizPadding,
+                                vertical: VTable._vertPadding,
+                              ),
+                              //child: InkWell(
+                              //onTap: () {
+                              //print("oi");
+                              //},
+                              child: column.widgetFor(context, item),
+                            )
+                            //),
                             ),
-                            color: column.validate(item)?.colorForSeverity,
-                            child: column.widgetFor(context, item),
-                          ),
-                        ),
                       ),
-                    )
-                ],
+                  ],
+                ),
               ),
-            ),
-          ),
-        );
+            ));
       },
     );
   }
 
-  void trySort(VTableColumn<T> column) {
+  void trySort(VTableColumn<ProcessModel> column) {
     if (!column.supportsSort) {
       return;
     }
@@ -346,7 +358,7 @@ class _VTableState<T> extends State<VTable<T>> {
     return widths;
   }
 
-  void _select(T item) {
+  void _select(ProcessModel item) {
     if (widget.supportsSelection) {
       setState(() {
         if (selectedItem.value != item) {
@@ -358,7 +370,7 @@ class _VTableState<T> extends State<VTable<T>> {
     }
   }
 
-  void _doubleTap(T item) {
+  void _doubleTap(ProcessModel item) {
     if (widget.onDoubleTap != null) {
       widget.onDoubleTap!(item);
     }
@@ -401,7 +413,6 @@ class _ColumnHeader extends StatelessWidget {
               AnimatedRotation(
                 turns: sortAscending! ? 0 : 0.5,
                 duration: const Duration(milliseconds: 200),
-                //child: const Icon(Icons.keyboard_arrow_up),
               ),
             Expanded(
               child: icon != null
@@ -409,12 +420,12 @@ class _ColumnHeader extends StatelessWidget {
                       message: title,
                       child: Align(
                         alignment: alignment ?? Alignment.centerLeft,
-                        //child: Icon(icon),
                       ),
                     )
                   : Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 18),
                       textAlign: swapSortIconSized ? TextAlign.end : null,
                     ),
             ),
@@ -422,7 +433,6 @@ class _ColumnHeader extends StatelessWidget {
               AnimatedRotation(
                 turns: sortAscending! ? 0 : 0.5,
                 duration: const Duration(milliseconds: 200),
-                //child: const Icon(Icons.keyboard_arrow_up),
               ),
           ],
         ),
@@ -432,25 +442,27 @@ class _ColumnHeader extends StatelessWidget {
 }
 
 /// A callback to render a data object (`T`) to a widget.
-typedef RenderFunction<T> = Widget? Function(
-    BuildContext context, T object, String out);
+typedef RenderFunction<ProcessModel> = Widget? Function(
+    BuildContext context, ProcessModel object, String out);
 
 /// A callback to render a data object to a string.
-typedef TransformFunction<T> = String Function(T object);
+typedef TransformFunction<ProcessModel> = String Function(ProcessModel object);
 
 /// A callback to apply style to a cell based on a data object's properties.
-typedef StyleFunction<T> = TextStyle? Function(T object);
+typedef StyleFunction<ProcessModel> = TextStyle? Function(ProcessModel object);
 
 /// A callback to compare two table row data objects.
-typedef CompareFunction<T> = int Function(T a, T b);
+typedef CompareFunction<ProcessModel> = int Function(
+    ProcessModel a, ProcessModel b);
 
 /// A callback to apply validation to a table cell.
 ///
 /// See [ValidationResult] for the possible return values.
-typedef ValidationFunction<T> = ValidationResult? Function(T object);
+typedef ValidationFunction<ProcessModel> = ValidationResult? Function(
+    ProcessModel object);
 
 /// The definition of a table's column.
-class VTableColumn<T> {
+class VTableColumn<ProcessModel> {
   /// The title of a column.
   final String label;
 
@@ -471,19 +483,19 @@ class VTableColumn<T> {
 
   /// A callback to convert a cell's contents to a string; if not provided, this
   /// will default to calling `toString` on the row object.
-  final TransformFunction<T>? transformFunction;
+  final TransformFunction<ProcessModel>? transformFunction;
 
   /// A callback to allow for custom styling of a cell (bold, italic, ...).
-  final StyleFunction<T>? styleFunction;
+  final StyleFunction<ProcessModel>? styleFunction;
 
   /// A callback to compare two row objects; this is used when sorting rows.
-  final CompareFunction<T>? compareFunction;
+  final CompareFunction<ProcessModel>? compareFunction;
 
   /// A set of validators for cell contents.
-  final List<ValidationFunction<T>> validators;
+  final List<ValidationFunction<ProcessModel>> validators;
 
   /// A callback to support converting a data object to a custom widget.
-  final RenderFunction<T>? renderFunction;
+  final RenderFunction<ProcessModel>? renderFunction;
 
   /// Construct a new [VTableColumn intance.
   VTableColumn({
@@ -499,7 +511,7 @@ class VTableColumn<T> {
     this.renderFunction,
   });
 
-  Widget widgetFor(BuildContext context, T item) {
+  Widget widgetFor(BuildContext context, ProcessModel item) {
     final out = transformFunction != null ? transformFunction!(item) : '$item';
 
     if (renderFunction != null) {
@@ -507,53 +519,52 @@ class VTableColumn<T> {
       if (widget != null) return widget;
     }
 
-    var style = styleFunction == null ? null : styleFunction!(item);
-
     if (out.contains("MB")) {
       return Row(children: [
         Text(
           out.replaceAll("MB", ""),
-          style: style,
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w400),
           maxLines: 2,
         ),
         Text(
           out.substring(out.length - 2),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           maxLines: 2,
         )
       ]);
     } else {
       var text;
-      if(out.length>11) {
+      if (out.length > 11) {
         text = out.substring(0, 8);
       } else {
         text = out;
       }
-      text = text.substring(0,1).toUpperCase() + text.substring(1);
+      text = text.substring(0, 1).toUpperCase() + text.substring(1);
       return Row(children: [
+        //ListTile(ProcessModelitle: Text("oi"),onTap: () {print("minha pika ta no ceu");},),
         SizedBox(
-          width: 30,
-          height: 30,
-          child: Image.asset("assets/icons/"+findConstant(out)),
+          width: 35,
+          height: 35,
+          child: Image.asset("assets/icons/" + findConstant(out)),
         ),
-        SizedBox(
-          width: 12,
+        const SizedBox(
+          width: 16,
         ),
         Text(
-          text.replaceAll(".exe",""),
-          style: style,
+          text.replaceAll(".exe", ""),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w400),
           maxLines: 2,
         )
       ]);
     }
   }
 
-  void sort(List<T> items, {required bool ascending}) {
+  void sort(List<ProcessModel> items, {required bool ascending}) {
     if (compareFunction != null) {
       items
           .sort(ascending ? compareFunction : (a, b) => compareFunction!(b, a));
     } else if (transformFunction != null) {
-      items.sort((T a, T b) {
+      items.sort((ProcessModel a, ProcessModel b) {
         var strA = transformFunction!(a);
         var strB = transformFunction!(b);
         return ascending ? strA.compareTo(strB) : strB.compareTo(strA);
@@ -563,7 +574,7 @@ class VTableColumn<T> {
 
   bool get supportsSort => compareFunction != null || transformFunction != null;
 
-  ValidationResult? validate(T item) {
+  ValidationResult? validate(ProcessModel item) {
     if (validators.isEmpty) {
       return null;
     } else if (validators.length == 1) {

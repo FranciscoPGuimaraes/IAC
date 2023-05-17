@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '/widgets/switchButton.dart';
+import '../models/ConfigPageModel.dart';
 //import '/widgets/progressBar.dart';
 
 class ConfigPage extends StatefulWidget {
@@ -21,6 +23,8 @@ class _ConfigPageState extends State<ConfigPage> {
 
   @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as ConfigScreenArguments;
     final double halfScream = MediaQuery.of(context).size.height / 2;
     return Scaffold(
         backgroundColor: Colors.white,
@@ -35,9 +39,12 @@ class _ConfigPageState extends State<ConfigPage> {
           ),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            BackButton(
+              style: ButtonStyle(),
+            ),
             Container(
               padding:
-                  EdgeInsets.only(top: 50, left: 80, right: 80, bottom: 20),
+                  EdgeInsets.only(top: 20, left: 80, right: 80, bottom: 20),
               child: Row(
                 children: [
                   SizedBox(
@@ -83,13 +90,13 @@ class _ConfigPageState extends State<ConfigPage> {
                                     barRadius: const Radius.circular(16),
                                     width: 650,
                                     lineHeight: 25,
-                                    percent: 0.8,
-                                    center: Text("32GB",
+                                    percent: (args.total / 100),
+                                    center: Text(
+                                        '${args.total.toStringAsFixed(4)} GB',
                                         style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.w700,
-                                          color: Color.fromARGB(
-                                              255, 214, 214, 214),
+                                          color: Color.fromARGB(255, 0, 0, 0),
                                         )),
                                     progressColor:
                                         Color.fromARGB(255, 0, 173, 196),
@@ -117,13 +124,12 @@ class _ConfigPageState extends State<ConfigPage> {
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(top: 80, left: 10),
-                                  child:
-                                      Text("Quero ativar a notificação de uso",
-                                          style: TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color.fromARGB(255, 0, 0, 0),
-                                          )),
+                                  child: Text("Ativar a notificação de uso",
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                      )),
                                 )
                               ],
                             ),
@@ -135,7 +141,7 @@ class _ConfigPageState extends State<ConfigPage> {
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(top: 5, left: 5),
-                                  child: Text("Quero definir um limite diario",
+                                  child: Text("Definir um limite diario",
                                       style: TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.w400,
@@ -156,13 +162,14 @@ class _ConfigPageState extends State<ConfigPage> {
                                               Color.fromARGB(
                                                   255, 63, 144, 219)),
                                     ),
-                                    onPressed: () => {},
-                                    child: Text(
-                                        "Mais Créditos",
+                                    onPressed: () =>
+                                        launch('https://www.viasat.com/pt-br/'),
+                                    child: Text("Mais Créditos",
                                         style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.w400,
-                                          color: Color.fromARGB(255, 255, 255, 255),
+                                          color: Color.fromARGB(
+                                              255, 255, 255, 255),
                                         )),
                                   ),
                                 )
