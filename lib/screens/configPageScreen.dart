@@ -50,7 +50,7 @@ class _ConfigPageState extends State<ConfigPage> {
                   SizedBox(
                     width: 100,
                     height: 100,
-                    child: Image.asset('assets/icons/default.png'),
+                    child: Image.asset('assets/images/config.png'),
                   )
                 ],
               ),
@@ -162,8 +162,9 @@ class _ConfigPageState extends State<ConfigPage> {
                                               Color.fromARGB(
                                                   255, 63, 144, 219)),
                                     ),
-                                    onPressed: () =>
-                                        launch('https://www.viasat.com/pt-br/'),
+                                    onPressed: () {
+                                        launch('https://www.viasat.com/pt-br/');
+                                    },
                                     child: Text("Mais Créditos",
                                         style: TextStyle(
                                           fontSize: 20,

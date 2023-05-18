@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:ViasatMonitor/helpers/getSystemInfo.dart';
 import 'package:ViasatMonitor/widgets/confirmationExit.dart';
+import 'package:hive/hive.dart';
+import  'package:intl/intl.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:speed_test_dart/classes/classes.dart';
@@ -10,6 +14,7 @@ import 'package:speed_test_dart/speed_test_dart.dart';
 import '../helpers/converter.dart';
 import '../models/ConfigPageModel.dart';
 import '../services/HiveIntegration.dart';
+import '../services/HiveIntegrationNetTest.dart';
 import '../widgets/errorMensagem.dart';
 import '../widgets/table.dart';
 import '../widgets/gauge.dart';
@@ -28,9 +33,12 @@ class _HomePageState extends State<HomePage> {
   var isAscending = true;
   var sortColumnIndex = 0;
 
+  int textPing = -1;
+
   CarouselController carouselController = CarouselController();
 
   late final CrudHive crud;
+  late final CrudHiveNet crudNet;
   final StreamController<String> _streamController = StreamController<String>();
   int _ready = 0;
   double _sumDataValue = 0;
@@ -61,13 +69,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _testDownloadSpeed() async {
     setState(() {
-      loadingDownload = true;
+      loadingUpload = true;
     });
     final _downloadRate =
         await tester.testDownloadSpeed(servers: bestServersList);
     setState(() {
       downloadRate = _downloadRate;
-      loadingDownload = false;
     });
   }
 
@@ -94,9 +101,23 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  hiveTest() async {
-    await crud.addInfo("Gabriel");
-    await crud.getInfo();
+  //void startRepeatedExecution() {
+  //  const duration = Duration(seconds: 15);
+  //  Timer.periodic(duration, (Timer timer) {
+  //    // Chame a função que deseja executar a cada 10 minutos aqui
+  //    executeFunction();
+  //  });
+  //}
+
+  //void executeFunction() async {
+  //  String tdata = DateFormat("yyyy-MM-dd_HH-mm").format(DateTime.now());
+  //  print(tdata);
+  //  //await crud.addInfoSummed(tdata, _sumDataValue);
+  //  await crud.getInfo();
+  //}
+
+  _saveNetTest(upload,download,ping,date) async{
+    await crudNet.addInfoNetTest(upload,download,ping,getDate());
   }
 
   runTimer() {
@@ -110,21 +131,63 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  getHostIp(){
+    final hostname = 'google.com';
+
+    InternetAddress.lookup(hostname).then((List<InternetAddress> addresses) {
+      if (addresses.isNotEmpty) {
+        final address = addresses.first;
+        print('Endereço IP: ${address.address}');
+        return address.address;
+      } else {
+        print('Não foi possível resolver o nome de host.');
+      }
+    }).catchError((error) {
+      print('Ocorreu um erro ao resolver o nome de host: $error');
+    });
+    return "142.251.128.110";
+  }
+
+  Future<void> measureLatency() async {
+    final address = InternetAddress(getHostIp()); // Substitua pelo endereço que deseja medir a latência
+    final port = 80; // Substitua pela porta que deseja usar
+
+    final socket = await Socket.connect(address, port);
+
+    final startTime = DateTime.now();
+
+    socket.write(
+        'GET / HTTP/1.1\r\nHost: exemplo.com\r\nConnection: close\r\n\r\n');
+
+    await socket.flush();
+    await socket.close();
+
+    final endTime = DateTime.now();
+
+    final latency = endTime.difference(startTime).inMilliseconds;
+
+    setState(() {
+      textPing = latency;
+    });
+  }
+
   @override
   initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       connect(_streamController);
       crud = CrudHive();
+      crudNet = CrudHiveNet();
       setBestServers();
       runTimer();
+      //startRepeatedExecution();
     });
   }
 
   @override
   void dispose() {
     crud.close();
-    //_streamController.close();
+    crudNet.close();
     super.dispose();
   }
 
@@ -160,6 +223,13 @@ class _HomePageState extends State<HomePage> {
               title: const Text("Detalhes"),
               onTap: () {
                 Navigator.of(context).pushNamed('/details');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text("Histórico"),
+              onTap: () {
+                Navigator.of(context).pushNamed('/history');
               },
             ),
           ],
@@ -244,46 +314,7 @@ class _HomePageState extends State<HomePage> {
                                         },
                                       ),
                                     ),
-                                    Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 150),
-                                          child: loadingDownload
-                                              ? const Column(
-                                                  children: [
-                                                    CircularProgressIndicator(),
-                                                    SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                  ],
-                                                )
-                                              : ElevatedButton(
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor: readyToTest &&
-                                                            !loadingDownload
-                                                        ? const Color.fromRGBO(
-                                                            65, 84, 249, 1)
-                                                        : Colors.grey,
-                                                  ),
-                                                  onPressed: loadingDownload
-                                                      ? null
-                                                      : () async {
-                                                          if (!readyToTest ||
-                                                              bestServersList
-                                                                  .isEmpty) {
-                                                            return;
-                                                          }
-                                                          await _testDownloadSpeed();
-                                                        },
-                                                  child: const Text('Testar'),
-                                                ),
-                                        ))
                                   ],
-                                ),
-                                const SizedBox(
-                                  height: 15,
                                 ),
                                 const Text(
                                   'Velocidade de Upload',
@@ -337,13 +368,28 @@ class _HomePageState extends State<HomePage> {
                                                                   .isEmpty) {
                                                             return;
                                                           }
-                                                          await _testUploadSpeed();
+                                                          await _testDownloadSpeed();
+                                                          await _testUploadSpeed();//upload,download,ping,date
+                                                          await _saveNetTest(
+                                                            "$uploadRate MB/s",
+                                                            "$downloadRate MB/s",
+                                                            "$textPing ms",
+                                                            getDate()
+                                                          );
                                                         },
                                                   child: const Text('Testar'),
                                                 ),
-                                        ))
+                                        )),
                                   ],
                                 ),
+                                textPing > -1
+                                    ? Text(
+                                        "Ping: $textPing ms",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
+                                      )
+                                    : const SizedBox()
                               ],
                             ),
                           ]),
@@ -377,46 +423,44 @@ class _HomePageState extends State<HomePage> {
                     child: SizedBox(
                         width: halfScream / 1.2,
                         child: DecoratedBox(
-                            decoration: const BoxDecoration(
-                                color: Color.fromRGBO(255, 255, 255, 0)),
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 0),
-                              child: StreamBuilder<String>(
-                                stream: _streamController.stream,
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData &&
-                                      snapshot.data != null &&
-                                      snapshot.connectionState ==
-                                          ConnectionState.active) {
-                                    List<ProcessModel> textWidgets = [];
-                                    var data = snapshot.data;
-                                    if (data != null) {
-                                      Map<String, dynamic> jsonCodeC =
-                                          jsonDecode(data);
-                                      for (var element in jsonCodeC.values) {
-                                        textWidgets.add(ProcessModel(
-                                          name: element["name"],
-                                          upload: element["upload"],
-                                          download: element["download"],
-                                          //uploadSpeed: element["upload_speed"],
-                                          //downloadSpeed: element["download_speed"],
-                                        ));
-                                      }
+                          decoration: const BoxDecoration(
+                              color: Color.fromRGBO(255, 255, 255, 0)),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 0),
+                            child: StreamBuilder<String>(
+                              stream: _streamController.stream,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData &&
+                                    snapshot.data != null &&
+                                    snapshot.connectionState ==
+                                        ConnectionState.active) {
+                                  List<ProcessModel> textWidgets = [];
+                                  var data = snapshot.data;
+                                  if (data != null) {
+                                    Map<String, dynamic> jsonCodeC =
+                                        jsonDecode(data);
+                                    for (var element in jsonCodeC.values) {
+                                      textWidgets.add(ProcessModel(
+                                        name: element["name"],
+                                        upload: element["upload"],
+                                        download: element["download"],
+                                      ));
                                     }
-                                    //print(textWidgets);
-                                    Future.delayed(Duration.zero, () {
-                                      saveDataUsed(textWidgets);
-                                    });
-                                    return Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 100, bottom: 100),
-                                        child: createTable(textWidgets));
-                                  } else {
-                                    return errorMensage();
                                   }
-                                },
-                              ),
-                            ))),
+                                  Future.delayed(Duration.zero, () {
+                                    saveDataUsed(textWidgets);
+                                  });
+                                  return Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 100, bottom: 100),
+                                      child: createTable(textWidgets));
+                                } else {
+                                  return errorMensage();
+                                }
+                              },
+                            ),
+                          ),
+                        )),
                   ),
                 ],
               ),

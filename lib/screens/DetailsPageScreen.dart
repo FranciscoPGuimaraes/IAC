@@ -97,7 +97,7 @@ class _DetailsPageState extends State<DetailsPage> {
                   SizedBox(
                     width: 100,
                     height: 100,
-                    child: Image.asset('assets/icons/default.png'),
+                    child: Image.asset('assets/images/detalhes.png'),
                   )
                 ],
               ),

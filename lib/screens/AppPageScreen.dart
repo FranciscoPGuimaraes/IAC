@@ -100,7 +100,7 @@ class _AppPageState extends State<AppPage> {
                                               fontWeight: FontWeight.w500,
                                             )),
                                         Text(
-                                            " - ${(sumAndConvertToMb(args.dowload, args.upload)).toStringAsFixed(3)} MB",
+                                            " - ${(sumAndConvertToMb(args.dowload, args.upload)).toStringAsFixed(2)} MB",
                                             style: TextStyle(
                                               fontSize: 25,
                                               fontWeight: FontWeight.w700,
@@ -126,7 +126,7 @@ class _AppPageState extends State<AppPage> {
                                               fontWeight: FontWeight.w500,
                                             )),
                                         Text(
-                                            " - ${convertToMb(args.upload).toStringAsFixed(2)} MB",
+                                            " - ${convertToMb(args.upload).toStringAsFixed(0)} MB",
                                             style: TextStyle(
                                               fontSize: 25,
                                               fontWeight: FontWeight.w700,
@@ -152,7 +152,7 @@ class _AppPageState extends State<AppPage> {
                                               fontWeight: FontWeight.w500,
                                             )),
                                         Text(
-                                            " - ${convertToMb(args.dowload).toStringAsFixed(2)} MB",
+                                            " - ${convertToMb(args.dowload).toStringAsFixed(0)} MB",
                                             style: TextStyle(
                                               fontSize: 25,
                                               fontWeight: FontWeight.w700,
