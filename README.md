@@ -18,6 +18,31 @@ Projeto desenvolvido no Inatel App Challenge 2023.
 - FranquisePage: Planos de internet (ViaSat) disponiveis. Também possibilita a seleção do plano utilizado. 
 
 
+## ⚙️ Estruturação
+IAC/
+  ├── lib/
+  │   ├── main.dart  - Inicialização e configuração de rotas internas
+  │   ├── models/    - Modelos para consumo e estruturação de dados
+  │   │   └── ...
+  │   ├── services/  - Integrações com banco de dados e porta socket
+  │   │   └── ...
+  │   ├── screens/   - Telas do aplicativo
+  │   │   └── ...
+  │   ├── widgets/   - Modularização de alguns Widgets usados nas Screens
+  │   │   └── ...
+  │   ├── constants/ - Constantes para utilização dos icones
+  │   │   └── ...
+  │   ├── helpers/ - Algumas funções de conversão e outras utilidades
+  │   │   └── ...
+  │   └── ...
+  ├── assets/
+  │   ├── images/    - Images usadas nas telas
+  │   ├── icons/     - Icones que representam os processos
+  │   └── ...
+  ├── windows/       - Alguns configurações para o app desktop
+  └── ...            - Outras pastas que não desenvolvidas
+
+
 ## ✒️ Autores
 
 Mencione todos aqueles que ajudaram a levantar o projeto desde o seu início
