@@ -5,6 +5,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/widgets/switchButton.dart';
 import '../models/ConfigPageModel.dart';
+import '../services/HiveIntegrationPlano.dart';
 //import '/widgets/progressBar.dart';
 
 class ConfigPage extends StatefulWidget {
@@ -16,9 +17,16 @@ class ConfigPage extends StatefulWidget {
 
 class _ConfigPageState extends State<ConfigPage> {
   bool ligado = true;
+  late CrudHivePlano crud;
 
   switch_notification() {
     ligado = !ligado;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    crud = CrudHivePlano();
   }
 
   @override
@@ -90,7 +98,7 @@ class _ConfigPageState extends State<ConfigPage> {
                                     barRadius: const Radius.circular(16),
                                     width: 650,
                                     lineHeight: 25,
-                                    percent: (args.total / 100),
+                                    percent: (args.total / crud.getInfo()),
                                     center: Text(
                                         '${args.total.toStringAsFixed(4)} GB',
                                         style: TextStyle(
@@ -106,7 +114,7 @@ class _ConfigPageState extends State<ConfigPage> {
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(top: 20, left: 10),
-                                  child: Text("100GB",
+                                  child: Text("${crud.getInfo()}GB",
                                       style: TextStyle(
                                         fontSize: 24,
                                         fontWeight: FontWeight.w700,
@@ -163,7 +171,7 @@ class _ConfigPageState extends State<ConfigPage> {
                                                   255, 63, 144, 219)),
                                     ),
                                     onPressed: () {
-                                        launch('https://www.viasat.com/pt-br/');
+                                        
                                     },
                                     child: Text("Mais Créditos",
                                         style: TextStyle(

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:collection/collection.dart';
+import 'package:hive_flutter/adapters.dart';
+
+import '../services/HiveIntegration.dart';
 
 class ChartData {
   final double x;
@@ -8,29 +11,39 @@ class ChartData {
   ChartData({required this.x, required this.y});
 }
 
-List<ChartData> get chartData {
-  final data = <double>[25, 100, 50, 200,25 , 75, 50,  150];
-  return data
-      .mapIndexed(
-          ((index, element) => ChartData(x: index.toDouble(), y: element)))
-      .toList();
+
+List<double> listaa = [];
+List<double> searchArray(name){
+  late final Box box = Hive.box('history_app');
+  
+  final regex = RegExp(r'^'+name.replaceAll(".exe", ""));
+    List<double> dates = [];
+
+    //print(name);
+
+    for (var element in box.keys) {
+      if(regex.hasMatch(element)){
+        dates.add(box.get(element)[0]);
+      }
+    }
+    return dates;
 }
 
-class MyLineChart extends StatelessWidget {
-  final List<ChartData> points;
-  const MyLineChart(this.points, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+returnGrafic(nome){
+  var lista = searchArray(nome);
     return AspectRatio(
       aspectRatio: 0.1,
       child: LineChart(LineChartData(lineBarsData: [
         LineChartBarData(
             barWidth: 2,
-            color: Color.fromARGB(255, 152, 189, 94),
-            spots: points.map((point) => FlSpot(point.x, point.y)).toList(),
+            color: const Color.fromARGB(255, 152, 189, 94),
+            spots: lista
+                .mapIndexed(((index, element) =>
+                    ChartData(x: index.toDouble(), y: element)))
+                .toList()
+                .map((point) => FlSpot(point.x, point.y))
+                .toList(),
             dotData: FlDotData(show: true)),
       ])),
     );
   }
-}

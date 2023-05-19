@@ -5,6 +5,7 @@ import 'package:vtable_package/vtable.dart';
 import '../helpers/converter.dart';
 import '../models/AppPageModel.dart';
 import '/widgets/grafic.dart';
+import '../services/HiveIntegration.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({super.key});
@@ -14,6 +15,19 @@ class AppPage extends StatefulWidget {
 }
 
 class _AppPageState extends State<AppPage> {
+  var hist;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  /*convertToArray(iterable){
+    for (var element in iterable) {
+      print(element);
+    }
+    return iterable;
+  }*/
+
   @override
   Widget build(BuildContext context) {
     final argsT = ModalRoute.of(context)!.settings.arguments;
@@ -177,7 +191,7 @@ class _AppPageState extends State<AppPage> {
                 margin: EdgeInsets.only(top: 30, left: 60, right: 80),
                 padding:
                     EdgeInsets.only(top: 10, bottom: 30, left: 10, right: 10),
-                child: MyLineChart(chartData),
+                child: returnGrafic(args.name),
               ),
             )
           ]),

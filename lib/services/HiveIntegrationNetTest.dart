@@ -4,7 +4,7 @@ class CrudHiveNet {
   late final Box box = Hive.box('net_tests');
 
   addInfoNetTest(date,upload,download,ping) async {
-    await box.put(date, [upload, download, ping, date]);
+    await box.put(date, [date, ping, download, upload]);
   }
 
   getInfo() {

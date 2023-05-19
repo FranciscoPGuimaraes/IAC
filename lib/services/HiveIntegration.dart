@@ -1,14 +1,22 @@
-import 'package:ViasatMonitor/models/NetTestHiveModel.dart';
 import 'package:hive/hive.dart';
 
-class CrudHive {
-  late final Box box = Hive.box('box');
+import '../helpers/converter.dart';
+import '../models/ProcessModel.dart';
 
-  /*addInfoSummed(String date,double data) async {
-    await box.put(date, data);
+class CrudHive {
+  late final Box box = Hive.box('history_app');
+
+  addInfoSummed(String date, List<ProcessModel> data) async {
+    var keyName;
+    var value;
+    for (var element in data) {
+      keyName = "${element.name.replaceAll(".exe", "")}_$date";
+      value = sumAndConvertToMb(element.download,element.upload);
+      await box.put(keyName, [value,date]);
+    }
     print("adicionados");
   }
-
+  /*
   addInfo(date,process,download,upload) async {
     await box.put(date+"_"+upload, date);
     await box.put(date+"_"+process, process);
@@ -17,9 +25,23 @@ class CrudHive {
     print("adicionados");
   }*/
 
+  getHistory(String name) {
+    final regex = RegExp(r'^'+name.replaceAll(".exe", ""));
+    List<dynamic> dates = [];
+
+    //print(name);
+
+    for (var element in box.keys) {
+      if(regex.hasMatch(element)){
+        dates.add(box.get(element));
+      }
+    }
+    //print(dates);
+    return dates;
+  }
+
   getInfo() {
-    var name = box.get("2023-05-17_20-34");
-    print("Nome: $name");
+    print(box.values.runtimeType);
   }
 
   updateInfo() {

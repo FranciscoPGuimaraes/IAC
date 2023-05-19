@@ -90,6 +90,8 @@ flutter:
     - assets/images/barra_menu.png
     - assets/images/detalhes.png
     - assets/images/config.png
+    - assets/images/historia.png
+    - assets/images/plano.png
 
     - assets/icons/brave.png
     - assets/icons/default.png

@@ -58,7 +58,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   SizedBox(
                     width: 100,
                     height: 100,
-                    child: Image.asset('assets/icons/default.png'),
+                    child: Image.asset('assets/images/historia.png'),
                   )
                 ],
               ),
@@ -85,7 +85,7 @@ class _HistoryPageState extends State<HistoryPage> {
                               height: halfScream,
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                    color: Color.fromARGB(255, 0, 0, 0)),
+                                    color: Color.fromARGB(0, 0, 0, 0)),
                               ),
                               child: Row(
                                 children: [
@@ -94,12 +94,11 @@ class _HistoryPageState extends State<HistoryPage> {
                                     child: DataTable(
                                       decoration: BoxDecoration(
                                           color:
-                                              Color.fromARGB(255, 189, 230, 123),
+                                              Color.fromARGB(0, 189, 230, 123),
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(20)),
                                           border: Border.all(
-                                              color: Color.fromARGB(
-                                                  255, 152, 189, 94),
+                                              color: Color.fromARGB(0, 153, 189, 94),
                                               width: 2)),
                                       columns: <DataColumn>[
                                         DataColumn(

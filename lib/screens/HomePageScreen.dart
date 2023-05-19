@@ -4,12 +4,11 @@ import 'dart:io';
 
 import 'package:ViasatMonitor/helpers/getSystemInfo.dart';
 import 'package:ViasatMonitor/widgets/confirmationExit.dart';
-import 'package:hive/hive.dart';
-import  'package:intl/intl.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:speed_test_dart/classes/classes.dart';
 import 'package:speed_test_dart/speed_test_dart.dart';
+import 'package:intl/intl.dart';
 
 import '../helpers/converter.dart';
 import '../models/ConfigPageModel.dart';
@@ -39,6 +38,7 @@ class _HomePageState extends State<HomePage> {
 
   late final CrudHive crud;
   late final CrudHiveNet crudNet;
+  List<ProcessModel> textWidgets = [];
   final StreamController<String> _streamController = StreamController<String>();
   int _ready = 0;
   double _sumDataValue = 0;
@@ -101,20 +101,20 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  //void startRepeatedExecution() {
-  //  const duration = Duration(seconds: 15);
-  //  Timer.periodic(duration, (Timer timer) {
-  //    // Chame a função que deseja executar a cada 10 minutos aqui
-  //    executeFunction();
-  //  });
-  //}
+  void startRepeatedExecution() {
+    const duration = Duration(minutes: 1);
+    Timer.periodic(duration, (Timer timer) {
+      // Chame a função que deseja executar a cada 10 minutos aqui
+      executeFunction();
+    });
+  }
 
-  //void executeFunction() async {
-  //  String tdata = DateFormat("yyyy-MM-dd_HH-mm").format(DateTime.now());
-  //  print(tdata);
-  //  //await crud.addInfoSummed(tdata, _sumDataValue);
-  //  await crud.getInfo();
-  //}
+  void executeFunction() async {
+    String tdata = DateFormat("yyyy-MM-dd_HH-mm").format(DateTime.now());
+    //print(tdata);
+    await crud.addInfoSummed(tdata, textWidgets);
+    await crud.getInfo();
+  }
 
   _saveNetTest(upload,download,ping,date) async{
     await crudNet.addInfoNetTest(upload,download,ping,getDate());
@@ -180,7 +180,7 @@ class _HomePageState extends State<HomePage> {
       crudNet = CrudHiveNet();
       setBestServers();
       runTimer();
-      //startRepeatedExecution();
+      startRepeatedExecution();
     });
   }
 
@@ -222,7 +222,7 @@ class _HomePageState extends State<HomePage> {
               leading: const Icon(Icons.pageview),
               title: const Text("Detalhes"),
               onTap: () {
-                Navigator.of(context).pushNamed('/details');
+                Navigator.of(context).pushNamed('/details', arguments: 30);
               },
             ),
             ListTile(
@@ -230,6 +230,13 @@ class _HomePageState extends State<HomePage> {
               title: const Text("Histórico"),
               onTap: () {
                 Navigator.of(context).pushNamed('/history');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.inventory_sharp),
+              title: const Text("Planos"),
+              onTap: () {
+                Navigator.of(context).pushNamed('/franquise');
               },
             ),
           ],
@@ -344,7 +351,7 @@ class _HomePageState extends State<HomePage> {
                                               const EdgeInsets.only(top: 150),
                                           child: loadingUpload
                                               ? const Column(
-                                                  children: [
+                                                  children: [                                                                                                                                                                                                          
                                                     CircularProgressIndicator(),
                                                     SizedBox(
                                                       height: 10,
@@ -370,6 +377,7 @@ class _HomePageState extends State<HomePage> {
                                                           }
                                                           await _testDownloadSpeed();
                                                           await _testUploadSpeed();//upload,download,ping,date
+                                                          await measureLatency();
                                                           await _saveNetTest(
                                                             "$uploadRate MB/s",
                                                             "$downloadRate MB/s",
@@ -434,7 +442,7 @@ class _HomePageState extends State<HomePage> {
                                     snapshot.data != null &&
                                     snapshot.connectionState ==
                                         ConnectionState.active) {
-                                  List<ProcessModel> textWidgets = [];
+                                  textWidgets = [];
                                   var data = snapshot.data;
                                   if (data != null) {
                                     Map<String, dynamic> jsonCodeC =
