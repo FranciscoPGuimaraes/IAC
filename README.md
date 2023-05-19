@@ -6,7 +6,7 @@ Baixar executável: (em breve)
 
 ## 📋 Pré-requisitos (rodar como desenvolvedor)
 
-BACKEND
+BACKEND<br />
 Rodar o backend (na pasta com o traffic_analyzer.py)
 Importar de https://github.com/Viasat/Viasat-NetworkTrafficMeter/tree/main
 ```
@@ -17,8 +17,8 @@ Para rodar o backend
 ```
 python.exe traffic_analyzer.py
 ```
-
-FRONTEND
+<br />
+FRONTEND<br />
 Flutter devidamente instalado, teste com:
 ```
 flutter doctor
