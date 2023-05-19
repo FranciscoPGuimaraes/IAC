@@ -38,7 +38,5 @@ IAC/<br />
 
 ## ✒️ Autores
 
-Mencione todos aqueles que ajudaram a levantar o projeto desde o seu início
-
 * **Francisco Pereira Guimarães** - [FranciscoPGuimaraes](https://github.com/linkParaPerfil)
 * **Gabriel de Souza Siqueira** - [gabrielss2406](https://github.com/FranciscoPGuimaraes)
