@@ -1,16 +1,26 @@
-# iac
+# ViaSat Monitor
 
-A new Flutter project.
+Projeto desenvolvido no Inatel App Challenge 2023.
 
-## Getting Started
+## 🛠️ Construído com
 
-This project is a starting point for a Flutter application.
+* [Flutter/Dart](http://www.dropwizard.io/1.0.2/docs/) - Tecnologia para desenvolvimento e funcionamento do App
+* [Python](https://maven.apache.org/) - Backend fornecido pela ViaSat
+* [Hive](https://rometools.github.io/rome/) - Banco de dados chave-valor
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 📋 Funcionalidades
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- HomePage: Conta com medidor de gasto geral, medidores de velocidade (download,upload,ping) e o gasto individual por processo.
+- AppPage: Análise individual dos gastos de cada app, mostrando o gasto total, de upload e download além de um gráfico que mostra o crescimento do gasto total.
+- ConfigPage: Mostra a situação atual do plano, além de possuir funcionalidades para gerenciar melhor os créditos. 
+- DetailsPage: Analise de gasto da internet de acordo com o host e de acordo com os protocolos.
+- FranquisePage: Planos de internet (ViaSat) disponiveis. Também possibilita a seleção do plano utilizado. 
+
+
+## ✒️ Autores
+
+Mencione todos aqueles que ajudaram a levantar o projeto desde o seu início
+
+* **Francisco Pereira Guimarães** - [FranciscoPGuimaraes](https://github.com/linkParaPerfil)
+* **Gabriel de Souza Siqueira** - [gabrielss2406](https://github.com/FranciscoPGuimaraes)
