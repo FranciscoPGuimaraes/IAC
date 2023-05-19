@@ -26,8 +26,6 @@ flutter doctor
 Para rodar o app
 ```
 flutter pub get
-```
-```
 flutter run -d windows
 ```
 
