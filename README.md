@@ -19,28 +19,28 @@ Projeto desenvolvido no Inatel App Challenge 2023.
 
 
 ## ⚙️ Estruturação
-IAC/
-  ├── lib/
-  │   ├── main.dart  - Inicialização e configuração de rotas internas
-  │   ├── models/    - Modelos para consumo e estruturação de dados
-  │   │   └── ...
-  │   ├── services/  - Integrações com banco de dados e porta socket
-  │   │   └── ...
-  │   ├── screens/   - Telas do aplicativo
-  │   │   └── ...
-  │   ├── widgets/   - Modularização de alguns Widgets usados nas Screens
-  │   │   └── ...
-  │   ├── constants/ - Constantes para utilização dos icones
-  │   │   └── ...
-  │   ├── helpers/ - Algumas funções de conversão e outras utilidades
-  │   │   └── ...
-  │   └── ...
-  ├── assets/
-  │   ├── images/    - Images usadas nas telas
-  │   ├── icons/     - Icones que representam os processos
-  │   └── ...
-  ├── windows/       - Alguns configurações para o app desktop
-  └── ...            - Outras pastas que não desenvolvidas
+IAC/<br />
+  ├── lib/<br />
+  │   ├── main.dart  - Inicialização e configuração de rotas internas<br />
+  │   ├── models/    - Modelos para consumo e estruturação de dados<br />
+  │   │   └── ...<br />
+  │   ├── services/  - Integrações com banco de dados e porta socket<br />
+  │   │   └── ...<br />
+  │   ├── screens/   - Telas do aplicativo<br />
+  │   │   └── ...<br />
+  │   ├── widgets/   - Modularização de alguns Widgets usados nas Screens<br />
+  │   │   └── ...<br />
+  │   ├── constants/ - Constantes para utilização dos icones<br />
+  │   │   └── ...<br />
+  │   ├── helpers/ - Algumas funções de conversão e outras utilidades<br />
+  │   │   └── ...<br />
+  │   └── ...<br />
+  ├── assets/<br />
+  │   ├── images/    - Images usadas nas telas<br />
+  │   ├── icons/     - Icones que representam os processos<br />
+  │   └── ...<br />
+  ├── windows/       - Alguns configurações para o app desktop<br />
+  └── ...            - Outras pastas que não desenvolvidas<br />
 
 
 ## ✒️ Autores
