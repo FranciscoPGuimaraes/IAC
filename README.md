@@ -1,6 +1,21 @@
 # ViaSat Monitor
 
 Projeto desenvolvido no Inatel App Challenge 2023.
+Baixar executável: (em breve)
+
+
+## 📋 Pré-requisitos (rodar como desenvolvedor)
+
+Flutter devidamente instalado, teste com:
+
+```
+flutter doctor
+```
+Para rodar o app
+```
+flutter pub get
+flutter run -d windows
+```
 
 ## 🛠️ Construído com
 
@@ -33,7 +48,7 @@ IAC/<br />
   │   ├── images/    - Images usadas nas telas<br />
   │   ├── icons/     - Icones que representam os processos<br />
   ├── windows/       - Alguns configurações para o app desktop<br />
-  └── ...            - Outras pastas que não desenvolvidas<br />
+  └── ...            - Outras pastas não desenvolvidas<br />
 
 
 ## ✒️ Autores
