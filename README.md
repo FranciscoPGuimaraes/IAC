@@ -17,7 +17,7 @@ Baixar executável: (em breve)
 - AppPage: Análise individual dos gastos de cada app, mostrando o gasto total, de upload e download além de um gráfico que mostra o crescimento do gasto total.
 - ConfigPage: Mostra a situação atual do plano, além de possuir funcionalidades para gerenciar melhor os créditos. 
 - DetailsPage: Analise de gasto da internet de acordo com o host e de acordo com os protocolos.
-- FranquisePage: Planos de internet (ViaSat) disponiveis. Também possibilita a seleção do plano utilizado. 
+- FranquisePage: Planos de internet (ViaSat) disponiveis, também possibilita a seleção do plano utilizado. 
 - HistoryPage: Histórico de todos os testes de velocidade realizados pelo app.
 
 
